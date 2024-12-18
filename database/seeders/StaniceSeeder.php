@@ -9,12 +9,28 @@ class StaniceSeeder extends Seeder
 {
     public function run()
     {
-        DB::table('stanice')->insert([
-            ['name' => 'Kraljevo', 'location' => 'Kraljevo, Srbija'],
-            ['name' => 'Vrnjacka banja', 'location' => 'Vrnjacka banja, Srbija'],
-            ['name' => 'Krusevac', 'location' => 'Krusevac, Srbija'],
-            ['name' => 'Trstenik', 'location' => 'Trstenik, Srbija'],
-            ['name' => 'Kragujevac', 'location' => 'Kragujevac, Srbija'],
-        ]);
+        $stanice = [
+            ['naziv' => 'Niš'],
+            ['naziv' => 'Aleksinac'],
+            ['naziv' => 'Stalać'],
+            ['naziv' => 'Ćićevac'],
+            ['naziv' => 'Paraćin'],
+            ['naziv' => 'Ćuprija'],
+            ['naziv' => 'Jagodina'],
+            ['naziv' => 'Lapovo'],
+            ['naziv' => 'Velika Plana'],
+            ['naziv' => 'Palanka'],
+            ['naziv' => 'Mladenovac'],
+            ['naziv' => 'Resnik'],
+            ['naziv' => 'Rakovica'],
+            ['naziv' => 'Beograd'],
+        ];
+
+        foreach ($stanice as $stanica) {
+            DB::table('stanice')->updateOrInsert(
+                ['naziv' => $stanica['naziv']],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        }
     }
 }

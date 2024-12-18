@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\LinijaController;
+use App\Http\Controllers\StanicaController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,8 +13,12 @@ use App\Http\Controllers\LinijaController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/search', [SearchController::class, 'index'])->name('search');
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Home route that directs to the 'index' method of the StanicaController
+// The route is named 'pregled' for easy reference in views or other parts of the application.
+Route::get('/', [StanicaController::class, 'index'])->name('pregled');
+
+// Search route that handles POST requests for searching stations
+// It invokes the 'search' method in the StanicaController to process the request.
+Route::post('/search', [StanicaController::class, 'search']);
+
