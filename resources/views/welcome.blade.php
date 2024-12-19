@@ -7,8 +7,35 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        .spinner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            visibility: hidden;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .transfer-button {
+            padding-top: 2rem;
+        }
+    </style>
 </head>
 <body>
+    <div id="spinner" class="spinner-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Pretraga železničkih linija</h1>
         <form id="searchForm">
@@ -22,7 +49,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2 d-flex align-items-center justify-content-center">
+                <div class="transfer-button col-md-2 d-flex align-items-center justify-content-center">
                     <button type="button" class="btn btn-secondary" id="swapStations" title="Zameni stanice">
                         &#8644;
                     </button>
@@ -64,6 +91,11 @@
             const fromStation = $('#fromStation').val();
             const toStation = $('#toStation').val();
 
+            const spinner = document.getElementById('spinner');
+
+            spinner.style.visibility = 'visible';
+            document.body.style.pointerEvents = 'none';
+
             if (!fromStation || !toStation) {
                 alert('Molimo odaberite obe stanice.');
                 return;
@@ -77,12 +109,14 @@
                     _token: $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function(response) {
+                    spinner.style.visibility = 'hidden';
+                    document.body.style.pointerEvents = 'auto';
                     let html = '';
                     $.each(response, function(linija, stavke) {
                         if (Array.isArray(stavke) && stavke.length > 0) {
                             const pocetnaStanica = stavke[0].od_stanice_naziv;
                             const krajnjaStanica = stavke[stavke.length - 1].do_stanice_naziv;
-                            const nazivLinije = stavke[0].naziv_linije; // Dodato: naziv linije
+                            const nazivLinije = stavke[0].naziv_linije;
 
                             html += `<h3>${nazivLinije} (${pocetnaStanica} -> ${krajnjaStanica})</h3>  <!-- Prikaz prvih i poslednjih stanica -->
                                      <table class="table table-bordered">
