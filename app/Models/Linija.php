@@ -15,7 +15,7 @@ class Linija extends Model
     protected $table = 'linije';
 
     // Define the mass-assignable attributes
-    protected $fillable = ['naziv_linije', 'od_stanica_id', 'do_stanica_id', 'vreme_polaska', 'vreme_dolaska'];
+    protected $fillable = ['smer_putovanja','naziv_linije', 'od_stanica_id', 'do_stanica_id', 'vreme_polaska', 'vreme_dolaska'];
 
     /**
      * Validates the provided data for creating or updating a railway line.

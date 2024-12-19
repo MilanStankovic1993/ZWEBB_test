@@ -48,12 +48,20 @@ class StanicaController extends Controller
         $from = $request->input('from_station');
         $to = $request->input('to_station');
 
+        // Determine the direction (smerPutovanja), true for "reverse" direction, false for normal
+        if ($from > $to) {
+            $smerPutovanja = 1;  // assuming 1 represents reverse direction
+        } else {
+            $smerPutovanja = 0;  // assuming 0 represents normal direction
+        }
+
         // Retrieve all line data from the database, including the stations' names
         $linije = \DB::table('linije')
             ->join('stanice as od_stanice', 'linije.od_stanice_id', '=', 'od_stanice.id')
             ->join('stanice as do_stanice', 'linije.do_stanice_id', '=', 'do_stanice.id')
             ->select(
                 'linije.id',
+                'smer_putovanja',
                 'linije.naziv_linije',
                 'od_stanice.naziv as od_stanice_naziv',
                 'do_stanice.naziv as do_stanice_naziv',
@@ -62,13 +70,22 @@ class StanicaController extends Controller
                 'linije.od_stanice_id',
                 'linije.do_stanice_id'
             )
-            ->orderBy('linije.naziv_linije')
+            ->orderBy('linije.id')
             ->get()
             ->toArray();
 
-        // Filter lines based on the selected 'from_station' and 'to_station'
-        $filtriraneLinije = array_filter($linije, function ($linija) use ($from, $to) {
-            return $linija->od_stanice_id >= $from && $linija->do_stanice_id <= $to;
+        // Filter lines based on the selected 'from_station', 'to_station' and 'smerPutovanja'
+        $filtriraneLinije = array_filter($linije, function ($linija) use ($from, $to, $smerPutovanja) {
+            // Check if the line matches the direction and station range
+            $isValidSmer = ($linija->smer_putovanja == $smerPutovanja);
+
+            // For normal direction (smerPutovanja == 0), check if from <= to
+            if ($smerPutovanja == 0) {
+                return $isValidSmer && $linija->od_stanice_id >= $from && $linija->do_stanice_id <= $to;
+            } else {
+                // For reverse direction (smerPutovanja == 1), check if from > to
+                return $isValidSmer && $linija->od_stanice_id <= $from && $linija->do_stanice_id >= $to;
+            }
         });
 
         // If no lines are found, return a message indicating no available lines

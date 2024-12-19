@@ -10,6 +10,7 @@ class CreateLinijeTable extends Migration
     {
         Schema::create('linije', function (Blueprint $table) {
             $table->id();
+            $table->boolean('smer_putovanja')->default(false);
             $table->string('naziv_linije');
             $table->unsignedBigInteger('od_stanice_id');
             $table->unsignedBigInteger('do_stanice_id');

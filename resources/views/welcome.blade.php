@@ -13,7 +13,7 @@
         <h1 class="text-center mb-4">Pretraga železničkih linija</h1>
         <form id="searchForm">
             <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-5">
                     <label for="fromStation" class="form-label">Od stanice:</label>
                     <select class="form-select" id="fromStation" name="from_station" required>
                         <option value="" disabled selected>Izaberite početnu stanicu</option>
@@ -22,7 +22,12 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-2 d-flex align-items-center justify-content-center">
+                    <button type="button" class="btn btn-secondary" id="swapStations" title="Zameni stanice">
+                        &#8644;
+                    </button>
+                </div>
+                <div class="col-md-5">
                     <label for="toStation" class="form-label">Do stanice:</label>
                     <select class="form-select" id="toStation" name="to_station" required>
                         <option value="" disabled selected>Izaberite krajnju stanicu</option>
@@ -45,6 +50,14 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
     $(document).ready(function() {
+        $('#swapStations').on('click', function() {
+            const fromValue = $('#fromStation').val();
+            const toValue = $('#toStation').val();
+
+            $('#fromStation').val(toValue);
+            $('#toStation').val(fromValue);
+        });
+
         $('#searchForm').on('submit', function(event) {
             event.preventDefault();
 
@@ -66,42 +79,32 @@
                 success: function(response) {
                     let html = '';
                     $.each(response, function(linija, stavke) {
-                        let ruta = [];
-                        if(Array.isArray(stavke)) {
-                            stavke.forEach(item => {
-                                if (!ruta.includes(item.od_stanice_naziv)) {
-                                    ruta.push(item.od_stanice_naziv);
-                                }
-                                if (!ruta.includes(item.do_stanice_naziv)) {
-                                    ruta.push(item.do_stanice_naziv);
-                                }
-                            });
-                        }
+                        if (Array.isArray(stavke) && stavke.length > 0) {
+                            const pocetnaStanica = stavke[0].od_stanice_naziv;
+                            const krajnjaStanica = stavke[stavke.length - 1].do_stanice_naziv;
+                            const nazivLinije = stavke[0].naziv_linije; // Dodato: naziv linije
 
-                        let rutaString = ruta.join(' -> ');
-
-                        if(Array.isArray(stavke)) {
-                            html += `<h3>Ruta: ${rutaString}</h3><table class="table table-bordered"><thead><tr><th>Polazak</th><th>Dolazak</th><th>Međustanice</th></tr></thead><tbody>`;
-                            let ruta = [];
+                            html += `<h3>${nazivLinije} (${pocetnaStanica} -> ${krajnjaStanica})</h3>  <!-- Prikaz prvih i poslednjih stanica -->
+                                     <table class="table table-bordered">
+                                         <thead>
+                                             <tr>
+                                                 <th>Polazak</th>
+                                                 <th>Dolazak</th>
+                                             </tr>
+                                         </thead>
+                                         <tbody>`;
                             stavke.forEach(item => {
-                                if (!ruta.includes(item.od_stanice_naziv)) {
-                                    ruta.push(item.od_stanice_naziv);
-                                }
-                                if (!ruta.includes(item.do_stanice_naziv)) {
-                                    ruta.push(item.do_stanice_naziv);
-                                }
                                 html += `
                                     <tr>
                                         <td>${item.od_stanice_naziv} u ${item.vreme_polaska}</td>
                                         <td>${item.do_stanice_naziv} u ${item.vreme_dolaska}</td>
-                                        <td>${item.od_stanice_naziv} -> ${item.do_stanice_naziv}</td>
                                     </tr>
                                 `;
                             });
+                            html += '</tbody></table>';
                         } else {
                             html += `<span>${stavke}</span>`;
                         }
-                        html += '</tbody></table>';
                     });
                     $('#searchResults').html(html);
                 },
